@@ -3,9 +3,9 @@ from glob import glob
 
 import cv2
 import numpy as np
-from keras.applications import InceptionV3
-from keras.applications.inception_v3 import preprocess_input
-from keras.models import model_from_json
+from tensorflow.keras.applications import InceptionV3
+from tensorflow.keras.applications.inception_v3 import preprocess_input
+from tensorflow.keras.models import model_from_json
 
 from utils import paths_to_tensor
 

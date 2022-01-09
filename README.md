@@ -26,16 +26,22 @@ Run the following code to verify:
 python get_results.py test_results.csv 0.4
 ```
 
-Run the following code to train the model.
+Run the following code to train the model:
 
 ```text
 python train_model.py
 ```
 
-Run the following code to test the model.
+Run the following code to test the model:
 
 ```text
 python test_model.py
+```
+
+Run the following code to run the model on custom images (for example, [here](cancer%20images)):
+
+```text
+python cancer_detection.py -i cancer\ images/test_melanoma.jpg
 ```
 
 View the output [here](my_submission/).

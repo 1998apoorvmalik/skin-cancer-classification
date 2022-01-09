@@ -1,26 +1,26 @@
-from keras.layers import Conv2D, Dropout, Flatten, Dense, MaxPooling2D, GlobalAveragePooling2D
-from keras.applications.inception_v3 import preprocess_input
-from keras.callbacks import ModelCheckpoint
-from keras.applications import InceptionV3
-from keras.callbacks import EarlyStopping
-from keras.models import Sequential
 from glob import glob
+
+from keras.applications import InceptionV3
+from keras.applications.inception_v3 import preprocess_input
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.layers import Dense, Dropout, GlobalAveragePooling2D
+from keras.models import Sequential
 from tqdm import tqdm
-from utils import *
-import numpy as np
+
+from utils import load_dataset, paths_to_tensor
 
 # Load the data for training.
-train_files, train_targets = load_dataset('data/train')
-valid_files, valid_targets = load_dataset('data/valid')
+train_files, train_targets = load_dataset("data/train")
+valid_files, valid_targets = load_dataset("data/valid")
 
 # Load lables.
 label_name = [item[11:-1] for item in sorted(glob("data/train/*/"))]
 
 # Summary of the dataset.
-print('Train Files Size: {}'.format(len(train_files)))
-print('Train Files Shape: {}'.format(train_files.shape))
-print('Target Shape: {}'.format(train_targets.shape))
-print('Label Names: {}'.format(label_name))
+print("Train Files Size: {}".format(len(train_files)))
+print("Train Files Shape: {}".format(train_files.shape))
+print("Target Shape: {}".format(train_targets.shape))
+print("Label Names: {}".format(label_name))
 
 """ Transfer learning using Inception V3 """
 # Load the Inception V3 model as well as the network weights from disk.
@@ -48,24 +48,32 @@ print("[INFO] Train data shape: {}".format(train_data.shape))
 CNN_model = Sequential()
 CNN_model.add(GlobalAveragePooling2D(input_shape=train_data.shape[1:]))
 CNN_model.add(Dropout(0.2))
-CNN_model.add(Dense(1024, activation='relu'))
+CNN_model.add(Dense(1024, activation="relu"))
 CNN_model.add(Dropout(0.2))
-CNN_model.add(Dense(3, activation='softmax'))
+CNN_model.add(Dense(3, activation="softmax"))
 
 # Model Summary.
 CNN_model.summary()
 
 # Compile the model.
-CNN_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+CNN_model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
 
 # Define the callbacks.
-checkpointer = ModelCheckpoint(filepath='saved_models_weights_checkpointer/weights.best.model.hdf5', verbose=1, save_best_only=True)
-early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=1, mode='min')
+checkpointer = ModelCheckpoint(
+    filepath="saved_models_weights_checkpointer/weights.best.model.hdf5", verbose=1, save_best_only=True
+)
+early_stopping = EarlyStopping(monitor="val_loss", patience=5, verbose=1, mode="min")
 
 # Train the model.
-CNN_model.fit(train_data, train_targets, 
+CNN_model.fit(
+    train_data,
+    train_targets,
     validation_data=(valid_data, valid_targets),
-    epochs=60, batch_size=200, callbacks=[checkpointer, early_stopping], verbose=1)
+    epochs=60,
+    batch_size=200,
+    callbacks=[checkpointer, early_stopping],
+    verbose=1,
+)
 
 """ Save the model """
 # Serialize model to JSON.

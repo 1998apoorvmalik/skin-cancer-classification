@@ -1,19 +1,21 @@
-from keras.applications.inception_v3 import preprocess_input
-from keras.applications import InceptionV3
-from keras.models import model_from_json
-from glob import glob
-from utils import *
 import argparse
+from glob import glob
+
 import cv2
+import numpy as np
+from keras.applications import InceptionV3
+from keras.applications.inception_v3 import preprocess_input
+from keras.models import model_from_json
+
+from utils import paths_to_tensor
 
 # Construct the argument parse and parse the arguments.
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required=True, 
-    help="Path to the input image")
+ap.add_argument("-i", "--image", required=True, help="Path to the input image")
 args = vars(ap.parse_args())
 
 # Input image.
-input_image = args['image']
+input_image = args["image"]
 
 """ Transfer learning using Inception V3 """
 # Load the Inception V3 model as well as the network weights from disk.
@@ -22,7 +24,7 @@ transfer_model = InceptionV3(include_top=False, weights="imagenet")
 
 """ Retrieve the saved CNN model """
 # Load json and create model.
-json_file = open('models/CNN_model.json', 'r')
+json_file = open("models/CNN_model.json", "r")
 loaded_model_json = json_file.read()
 json_file.close()
 loaded_model = model_from_json(loaded_model_json)
@@ -45,15 +47,16 @@ print("[INFO] Analyzing the skin lesion.")
 print("[INFO] Please Wait...")
 
 # Show output.
-cv2.namedWindow('Classification', cv2.WINDOW_NORMAL)
-cv2.resizeWindow('Classification', 1920, 1080)
+cv2.namedWindow("Classification", cv2.WINDOW_NORMAL)
+cv2.resizeWindow("Classification", 1920, 1080)
 orig = cv2.imread(args["image"])
 label_index = np.argmax(prediction)
 label = label_name[label_index]
 prob = prediction[0][label_index]
 print("[INFO] Analysis Completed!")
 print("[INFO] {} detected in the image.".format(label))
-cv2.putText(orig, "Label: {}, {:.2f}%".format(label, prob * 100),
-	(50, 300), cv2.FONT_HERSHEY_SIMPLEX, 5, (255, 255, 255), 2)
+cv2.putText(
+    orig, "Label: {}, {:.2f}%".format(label, prob * 100), (50, 300), cv2.FONT_HERSHEY_SIMPLEX, 5, (255, 255, 255), 2
+)
 cv2.imshow("Classification", orig)
 cv2.waitKey(0)
